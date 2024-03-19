@@ -8,8 +8,8 @@ import warnings
 import urllib
 from tqdm import tqdm
 import numpy as np
-from ..mind_reader.nvidia_ada import legacy
-from ..mind_reader.nvidia_ada import dnnlib
+from .nvidia_ada import legacy
+from .nvidia_ada import dnnlib
 
 
 def download(url: str, 
