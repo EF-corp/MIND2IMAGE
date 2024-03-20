@@ -46,9 +46,6 @@ class EEG2ImageDataset(torch.utils.data.Dataset):
     
     def __getitem__(self, idx):
 
-        eeg = self.eegs[idx]
-        norm = torch.max(eeg) / 2.0
-        eeg = (eeg - norm) / norm
         image = self.images[idx]
         con = self.eeg_feat[idx]
         return image, con

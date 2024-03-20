@@ -10,7 +10,7 @@ from tqdm import tqdm
 import numpy as np
 import legacy
 import dnnlib
-
+import argparse
 from models.model import EEGLSTM_Encoder, EEGTransformer
 
 def download(url: str, 
@@ -72,19 +72,19 @@ def load_model(model:nn.Module,
         else:
             model.state_dict(WEITHS).to(device).copy_to(model.state_dict())
 
-
+def save(data, dir):
+    pass
 
 @torch.no_grad()
 def generate(eeg_preprocess_model:nn.Module,
              path_ada:str,
              outdir:str,
-             data:Union[Tuple, List],
+             eeg:torch.Tensor,
              
              device:Union[str,torch.device]=torch.device("cuda" if torch.cuda.is_available() else "cpu"),):
     
     os.makedirs(outdir, exist_ok=True)
 
-    eeg, image, label = data
     norm = np.max(eeg) / 2.0
     eeg = (eeg - norm) / norm
     processed_eeg = eeg_preprocess_model(torch.from_numpy(np.expand_dims(eeg, axis=0)).to(device)).detach().cpu().numpy()[0]
@@ -98,8 +98,39 @@ def generate(eeg_preprocess_model:nn.Module,
 
     gen_images = torch.cat([G(z=z, c=c, noise_mode='const').cpu() for z, c in zip(grid_z, grid_c)]).numpy()
 
+    save(gen_images, outdir)
     return gen_images
 
+MODELS = {
+    "lstm": EEGLSTM_Encoder(num_layers=1),
+    "trans":EEGTransformer(n_layers=1)
+}
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--device', type=str, default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--path2eeg", type=str, required=True)
+    parser.add_argument("--path2ada", type=str, required=True)
+    parser.add_argument('--out_dir', type=str, required=True)
+    parser.add_argument('--path2data', type=str, required=True)
+    parser.add_argument('--eeg_model', type=str, required=True)
+    
+    args = parser.parse_args()
+    if args.eeg_model not in MODELS.keys():
+        raise ValueError()
+    model = MODELS.get(args.eeg_model)
+    model = load_model(model=model, path_or_url=args.path2eeg, device=args.device)
+
+    # Load the data
+    loaded_array = np.load(args.path2data, allow_pickle=True)
+    eeg_temp = loaded_array[1].T
+
+    generate(eeg_preprocess_model=model,
+             path_ada=args.path2ada,
+             outdir=args.out_dir,
+             eeg=eeg_temp,
+             device=args.device)
+    
+    return "SUCCES"
 
 
 if __name__ == "__main__":

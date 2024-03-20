@@ -4,7 +4,7 @@ import torch
 from multiprocessing import cpu_count
 
 def get_arguments():
-    parser = argparse.ArgumentParser(description='Description of your program')
+    parser = argparse.ArgumentParser(description='config for training model')
 
     parser.add_argument('--device', type=str, default="cuda" if torch.cuda.is_available() else "cpu")
 
