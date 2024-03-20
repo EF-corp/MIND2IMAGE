@@ -8,9 +8,10 @@ import warnings
 import urllib
 from tqdm import tqdm
 import numpy as np
-from .nvidia_ada import legacy
-from .nvidia_ada import dnnlib
+import legacy
+import dnnlib
 
+from models.model import EEGLSTM_Encoder, EEGTransformer
 
 def download(url: str, 
              root: str) -> str:
@@ -53,7 +54,7 @@ def load_model(model:nn.Module,
     
     if os.path.exists(path=path_or_url):
 
-        WEITHS = torch.load(path_or_url)
+        WEITHS = torch.load(path_or_url, map_location=device)
         if not to_this_model:
             model = model.load_state_dict(WEITHS['model_state_dict'])
             return model.to(device)
@@ -62,7 +63,7 @@ def load_model(model:nn.Module,
 
     else:
         path2loaded = download(url=path_or_url, root=root)
-        WEITHS = torch.load(path2loaded)
+        WEITHS = torch.load(path2loaded, map_location=device)
 
         if not to_this_model:
             model = model.load_state_dict(WEITHS['model_state_dict'])
@@ -102,5 +103,11 @@ def generate(eeg_preprocess_model:nn.Module,
 
 
 if __name__ == "__main__":
-    pass
+
+    model = EEGLSTM_Encoder(num_layers=1)
+    w = torch.load('c:\\Users\\rober\\Downloads\\eeg_lstm_model.pth', map_location="cpu")
+    model.load_state_dict(w)
+
+
+
 

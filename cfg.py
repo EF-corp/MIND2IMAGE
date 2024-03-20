@@ -23,7 +23,8 @@ def get_arguments():
     parser.add_argument('--num_workers', type=int, default=8)
     parser.add_argument('--latent_dim', type=int, default=128)
     parser.add_argument('--n_classes', type=int, default=40)
-    
+    parser.add_argument('--num_layers', type=int, default=1)
+    parser.add_argument('--out_size', type=int, default=256)
     parser.add_argument('--nworkers', type=int, default=cpu_count()-1)
     parser.add_argument('--lr', type=float, default=3e-4)
     parser.add_argument('--init_epoch', type=int, default=0)

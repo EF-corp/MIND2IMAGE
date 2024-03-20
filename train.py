@@ -10,10 +10,10 @@ import os
 import json
 import tempfile
 
-from .utils import to_device, CustomError
-from ..nvidia_ada import dnnlib
-from ..nvidia_ada.training import training_loop
-from ..nvidia_ada import legacy
+from utils import to_device, CustomError
+
+import dnnlib
+from training_ada import training_loop
 # from ..nvidia_ada.torch_utils import *
 
 class FeatureExtractorUser:

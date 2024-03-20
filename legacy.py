@@ -13,7 +13,7 @@ import copy
 import numpy as np
 import torch
 import dnnlib
-from torch_utils import misc
+from torch_utils_ada import misc
 
 #----------------------------------------------------------------------------
 
@@ -165,7 +165,7 @@ def convert_tf_generator(tf_G):
     #for name, value in tf_params.items(): print(f'{name:<50s}{list(value.shape)}')
 
     # Convert params.
-    from training import networks
+    from training_ada import networks
     G = networks.Generator(**kwargs).eval().requires_grad_(False)
     # pylint: disable=unnecessary-lambda
     _populate_module_params(G,
@@ -262,7 +262,7 @@ def convert_tf_discriminator(tf_D):
     #for name, value in tf_params.items(): print(f'{name:<50s}{list(value.shape)}')
 
     # Convert params.
-    from training import networks
+    from training_ada import networks
     D = networks.Discriminator(**kwargs).eval().requires_grad_(False)
     # pylint: disable=unnecessary-lambda
     _populate_module_params(D,
@@ -313,8 +313,5 @@ def convert_network_pickle(source, dest, force_fp16):
     print('Done.')
 
 #----------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    convert_network_pickle() # pylint: disable=no-value-for-parameter
 
 #----------------------------------------------------------------------------

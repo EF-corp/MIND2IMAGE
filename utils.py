@@ -5,6 +5,10 @@ from typing import *
 from torch.utils.data import DataLoader, Dataset
 from PIL import Image
 import pickle
+from scipy.optimize import linear_sum_assignment
+
+from sklearn.cluster import KMeans
+
 
 def to_device(*data:List[Union[torch.Tensor, torch.nn.Module]], 
               device:Union[str,torch.device]=torch.device("cuda" if torch.cuda.is_available() else "cpu")):
@@ -137,25 +141,51 @@ def save_image_grid(img, fname, drange, grid_size):
         Image.fromarray(img, 'RGB').save(fname)
 
 
-class ModelLoader:
-    def __init__(self) -> None:
-        pass
+# class ModelLoader:
+#     def __init__(self) -> None:
+#         pass
 
-    def load_pt_model(model:nn.Module, path2data:str,namekey:Any=None) -> nn.Module:
-        WEITHS = torch.load(path2data)
-        if namekey is not None:
-            model.load_state_dict(WEITHS[namekey])
-        else:
-            try:
-                model.load_state_dict(WEITHS)
-            except Exception as e:
-                print(e)
-                return model
-        return model
-    def load_pkl_model(model:nn.Module, path2data:str):
-        data = pickle.Unpickler(path2data).load()
+#     def load_pt_model(model:nn.Module, path2data:str,namekey:Any=None) -> nn.Module:
+#         WEITHS = torch.load(path2data)
+#         if namekey is not None:
+#             model.load_state_dict(WEITHS[namekey])
+#         else:
+#             try:
+#                 model.load_state_dict(WEITHS)
+#             except Exception as e:
+#                 print(e)
+#                 return model
+#         return model
+#     def load_pkl_model(model:nn.Module, path2data:str):
+#         data = pickle.Unpickler(path2data).load()
             
+class K_means:
+    def __init__(self, n_clusters=39, random_state=45):
+        self.n_clusters = n_clusters
+        self.random_state = random_state
         
+    def transform(self, text_embed, image_embed, Y_text=None, Y_image=None):
+        
+        text_label = KMeans(n_clusters=self.n_clusters, random_state=self.random_state, init='k-means++').fit_predict(text_embed)
+        text_score = self.cluster_acc(Y_text, text_label)
+
+        image_label = KMeans(n_clusters=self.n_clusters, random_state=self.random_state, init='k-means++').fit_predict(image_embed)
+        image_score = self.cluster_acc(Y_image, image_label)
+
+        return (text_label, image_label), (text_score, image_score)
+    
+    
+    def cluster_acc(self, y_true, y_pred):
+
+        y_true = y_true.astype(np.int64)
+        assert y_pred.size == y_true.size
+        D = max(y_pred.max(), y_true.max()) + 1
+        w = np.zeros((D, D), dtype=np.int64)
+        for i in range(y_pred.size):
+            w[y_pred[i], y_true[i]] += 1
+        ind = linear_sum_assignment(w.max() - w)
+        return sum([w[i, j] for i, j in zip(*ind)]) * 1.0 / y_pred.size
+            
 def get_eeg_model(model, path_to_weiths_main_model) -> nn.Module:
     WEITHS = torch.load(path_to_weiths_main_model)
     model.load_state_dict(WEITHS['model_state_dict'])

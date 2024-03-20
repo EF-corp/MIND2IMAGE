@@ -74,9 +74,9 @@ class Image_encoder(nn.Module):
             nn.Dropout(0.1),
             nn.ReLU(),
             nn.Linear(embedding_dim, embedding_dim, bias=False),
-        )
+        ).to(device)
 
-        self.image_embedding.fc.to(device)
+
 
     def forward(self,x: torch.Tensor):
         return self.image_embedding(x)

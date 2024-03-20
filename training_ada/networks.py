@@ -8,12 +8,12 @@
 
 import numpy as np
 import torch
-from torch_utils import misc
-from torch_utils import persistence
-from torch_utils.ops import conv2d_resample
-from torch_utils.ops import upfirdn2d
-from torch_utils.ops import bias_act
-from torch_utils.ops import fma
+from torch_utils_ada import misc
+from torch_utils_ada import persistence
+from torch_utils_ada.ops import conv2d_resample
+from torch_utils_ada.ops import upfirdn2d
+from torch_utils_ada.ops import bias_act
+from torch_utils_ada.ops import fma
 
 #----------------------------------------------------------------------------
 
